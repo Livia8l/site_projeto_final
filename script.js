@@ -74,10 +74,46 @@ const carrossel = document.getElementById('carrossel');
 const passo = () => carrossel.querySelector('.carrossel-item').offsetWidth + 18;
 document.getElementById('carrossel-prev').addEventListener('click', () => {
   carrossel.scrollBy({ left: -passo(), behavior: 'smooth' });
+  reiniciarAutoplayCarrossel();
 });
 document.getElementById('carrossel-next').addEventListener('click', () => {
   carrossel.scrollBy({ left: passo(), behavior: 'smooth' });
+  reiniciarAutoplayCarrossel();
 });
+
+/* ---------- carrossel de fotos: avança sozinho ---------- */
+const reduzirMovimentoCarrossel = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let carrosselTimer = null;
+
+function proximaFotoCarrossel(){
+  const estaNoFim = carrossel.scrollLeft + carrossel.clientWidth >= carrossel.scrollWidth - 5;
+  if (estaNoFim) {
+    carrossel.scrollTo({ left: 0, behavior: 'smooth' }); // volta pro início
+  } else {
+    carrossel.scrollBy({ left: passo(), behavior: 'smooth' });
+  }
+}
+
+function iniciarAutoplayCarrossel(){
+  clearInterval(carrosselTimer);
+  if (reduzirMovimentoCarrossel) return; // respeita quem prefere menos animação
+  carrosselTimer = setInterval(proximaFotoCarrossel, 3000);
+}
+
+function reiniciarAutoplayCarrossel(){
+  clearInterval(carrosselTimer);
+  clearTimeout(carrossel._retomarTimeout);
+  carrossel._retomarTimeout = setTimeout(iniciarAutoplayCarrossel, 4000);
+}
+
+// pausa quando o usuário mexe no carrossel manualmente e retoma depois de um tempo
+['mousedown', 'touchstart', 'wheel'].forEach(evento => {
+  carrossel.addEventListener(evento, reiniciarAutoplayCarrossel, { passive: true });
+});
+carrossel.addEventListener('mouseenter', () => clearInterval(carrosselTimer));
+carrossel.addEventListener('mouseleave', iniciarAutoplayCarrossel);
+
+iniciarAutoplayCarrossel();
 
 /* ---------- slider "três frentes": avança automaticamente ---------- */
 const frentesTrack = document.getElementById('frentes-track');

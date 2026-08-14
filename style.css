@@ -163,6 +163,7 @@ footer .faixa-azul-rodape{ min-height:150px; flex-direction:column; padding:44px
   gap:14px;
   margin-top:18px;
 }
+.carrossel-nav{ display:none; }
 .carrossel-btn{
   width:40px;
   height:40px;
